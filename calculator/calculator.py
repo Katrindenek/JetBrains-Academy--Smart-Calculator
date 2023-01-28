@@ -30,19 +30,19 @@ class UnknownCommand(Exception):
 
 class Number:
     def __init__(self, value=0):
-        self.value = value
+        self.value = int(value) if int(value) == value else value
 
     def plus(self, number):
-        return self.value + number.value
+        return round(self.value + number.value, 2)
 
     def minus(self, number):
-        return self.value - number.value
+        return round(self.value - number.value, 2)
 
     def multiplication(self, number):
-        return self.value * number.value
+        return round(self.value * number.value, 2)
 
     def division(self, number):
-        return int(self.value / number.value)
+        return round(self.value / number.value, 2)
 
 
 class Variable:
@@ -131,11 +131,13 @@ class Expression:
         expr = self.expr.replace(' ', '')
 
         element = ''
-        self.split_expr = []  # случай -10 всё ещё не учтён
+        self.split_expr = []
         for ch in expr:
             if len(element) == 0:
                 element += ch
-            elif element[-1].isalnum() == ch.isalnum() and ch != '(' and ch != ')':
+            elif ((element[-1].isalnum() == ch.isalnum()
+                   or ch == '.' or element[-1] == '.')
+                  and ch not in '()' and element[-1] not in '()'):
                 element += ch
             else:
                 self.split_expr.append(element)
@@ -144,11 +146,15 @@ class Expression:
         self.split_expr.append(element)
 
     def parse(self):
-        """ Converts numeric types and variables to the instance of the class Number; operations to the instance of Operation class. """
+        """
+        Converts numeric types and variables to the instance of the class Number,
+        and operations to the instance of Operation class.
+        """
+
         self.parsed_expr = []
         for i, el in enumerate(self.split_expr):
             try:
-                parsed = Number(int(el))
+                parsed = Number(float(el))
             except ValueError:
                 if el.isalpha():
                     if el not in Variable.var_dict:
@@ -169,6 +175,7 @@ class Expression:
                     raise InvalidExpression
             else:
                 self.parsed_expr.append(parsed)
+
 
     def to_postfix(self):
         """ Convert the split and parsed expression to the postfix notation.
@@ -195,7 +202,8 @@ class Expression:
                 elif Operation.precedence_rank[element.sign] >= Operation.precedence_rank[self.operations[-1].sign]:
                     while True:
                         if (len(self.operations) == 0 or self.operations[-1] == '('
-                           or Operation.precedence_rank[self.operations[-1].sign] > Operation.precedence_rank[element.sign]):
+                                or (Operation.precedence_rank[self.operations[-1].sign]
+                                    > Operation.precedence_rank[element.sign])):
                             self.operations.append(element)
                             break
                         self.postfix.append(self.operations.pop())
@@ -210,7 +218,8 @@ class Expression:
         Calculates the expression in postfix notation scanning it from left to right by following
         - If the incoming element is a number, push it into the stack (the whole number, not a single digit!).
         - If the incoming element is the name of a variable, push its value into the stack.
-        - If the incoming element is an operator, then pop twice to get two numbers and perform the operation; push the result on the stack.
+        - If the incoming element is an operator, then pop twice to get two numbers and perform the operation;
+            push the result on the stack.
         - When the expression ends, the number on the top of the stack is a final result.
 
         :return: the result integer value.
@@ -221,8 +230,12 @@ class Expression:
             if isinstance(element, Number):
                 calculate_stack.append(element)
             else:
-                second_num = calculate_stack.pop()
-                first_num = calculate_stack.pop()
+                if len(calculate_stack) == 1:
+                    second_num = calculate_stack.pop()
+                    first_num = Number(0.0)
+                else:
+                    second_num = calculate_stack.pop()
+                    first_num = calculate_stack.pop()
                 fun = methodcaller(element.method, second_num)
                 calculate_stack.append(Number(fun(first_num)))
 
@@ -236,24 +249,31 @@ def process_command(command):
         print('Bye!')
         return False
     elif command == '/help':
-        print("The program does the following operations: addition +, subtraction -, multiplication *, integer division / and parentheses (...)."
-              "The example of possible input: 3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1)."
-              "Note that two adjacent minus signs turn into a plus."
-              ""
-              "You can store results in variables. Note that:"
-              "- The name of a variable can contain ONLY LATIN LETTERS."
-              "- A variable can have a name consisting of more than one letter."
-              "- A variable name is CASE-SENSITIVE."
-              "- The value can be an INTEGER or a value of another VARIABLE."
-              "- Assigning a new value to an existing variable will REWRITE the previous value."
-              "- Type the name of a variable to print its value.")
+        print("""
+        The program currently supports the following operations: 
+                addition +, 
+                subtraction -, 
+                multiplication *, 
+                division /,
+                and parentheses (...).
+              
+        The example of possible input: 3 + 8 * ((4 + 3) * 2 + 1) - 6 / (2 + 1).
+        Note that two adjacent minus signs turn into a plus.
+          
+        You can store results in variables. Note that:
+          - The name of a variable can contain ONLY LATIN LETTERS.
+          - A variable can have a name consisting of more than one letter.
+          - A variable name is CASE-SENSITIVE.
+          - The value can be an INTEGER or a value of another VARIABLE.
+          - Assigning a new value to an existing variable will REWRITE the previous value.
+          - Type the name of a variable to print its value.""")
     else:
         raise UnknownCommand
     return True
 
 
 def process_expression(expression):
-    if '=' in expression:                               # Assignment
+    if '=' in expression:  # Assignment
         split_expression = expression.split('=')
         if len(split_expression) > 2:
             raise InvalidAssignment
@@ -268,13 +288,18 @@ def process_expression(expression):
                 raise InvalidAssignment
             else:
                 var.set_val(result)
-    else:                                               # Calculation
+    else:  # Calculation
         result = Expression(expression).calculate()
         print(result.value)
 
 
 if __name__ == '__main__':
     state = True
+    print("""Welcome to the smart calculator!
+          \nCommands:
+          /help -- to display manual,
+          /exit -- to finish work with the calculator.
+          \nInput your expression:""")
     while state:
         input_line = input()
         try:

@@ -12,7 +12,8 @@ class CalcTest(StageTest):
                 TestCase(stdin=['variable = 777 \n Variable', self.test_2_1,
                                 self.test_2_2, self.test_2_3, self.test_2_4]),
                 TestCase(stdin=['8 * (2 + 3', self.test_3_1, self.test_3_2, self.test_3_3, self.test_3_4]),
-                TestCase(stdin=['14       -   12', self.test_4_1, self.test_4_2])]
+                TestCase(stdin=['14       -   12', self.test_4_1, self.test_4_2]),
+                TestCase(stdin=['a=12\n-a', self.test_5_1, self.test_5_2])]
 
     # test of previous steps' functionality ####################################
     # help message test
@@ -128,7 +129,7 @@ class CalcTest(StageTest):
     # division operation test
     def test_2_3(self, output):
         output = str(output).lower().strip()
-        if output != "7" and output != "7.0":
+        if output != "7":
             return CheckResult.wrong("The program has problems with division operation.")
         return " a = 7 \n b = 2\na * 4 / b - (3 - 1)"
 
@@ -139,22 +140,6 @@ class CalcTest(StageTest):
             return CheckResult.wrong("The program cannot correctly process several operations.")
         self.on_exit = 1
         return "/exit"
-
-    # test of an example from the task
-    # def test_2_5(self, output):
-    #     output = str(output).lower().strip()
-    #     if output != "155":
-    #         return CheckResult.wrong("The program cannot reproduce an example from the task.")
-    #     return "3 + (9 + ( 68 * 3/9)) * ((7-2 * 5) / 2) * 6"
-    #     output: -282 input: "7 + 3 * ((4 + 3) * 7 + 1) - 6 / (2 + 1)"
-
-    # test of multi-level parentheses
-    # def test_2_6(self, output):
-    #     output = str(output).replace(".", " ").split()[0].strip()
-    #     if output != "-282":
-    #         return CheckResult.wrong("Program incorrectly solves expressions with multi-level parentheses")
-    #     self.on_exit = True
-    #     return "/exit"
 
     # negative tests for this stage ############################################
     # unclosed brackets from the right
@@ -198,6 +183,21 @@ class CalcTest(StageTest):
         output = str(output).lower().strip()
         if output != "7":
             return CheckResult.wrong("The program cannot process several spaces in the operation.")
+        self.on_exit = True
+        return "/exit"
+
+    # minus variable test
+    def test_5_1(self, output):
+        output = str(output).lower().strip()
+        if output != "-12":
+            return CheckResult.wrong("The program has problems with negative variables.")
+        return "a=2\nb=a\n-(3-1)+a*4/(b-1)"
+
+    # minus parentheses test
+    def test_5_2(self, output):
+        output = str(output).lower().strip()
+        if output != "6":
+            return CheckResult.wrong("The program cannot process minus parentheses at the beginning.")
         self.on_exit = True
         return "/exit"
 
