@@ -1,6 +1,6 @@
 # The Smart Calculator
 
-_The project is a part of the Python core made by [JetBrains Academy and Hyperskill](https://hyperskill.org/projects/74?track=2)._
+_The project is a part of the Python core track made by [JetBrains Academy and Hyperskill](https://hyperskill.org/projects/74?track=2)._
 
 The calculator supports operations such as 
 - addition, 
