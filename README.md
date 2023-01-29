@@ -1,6 +1,8 @@
 # The Smart Calculator
 
-_The project is a part of the Python core track made by [JetBrains Academy and Hyperskill](https://hyperskill.org/projects/74?track=2)._
+_The project is a part of the [Python core](https://hyperskill.org/tracks/2) track made by JetBrains Academy and Hyperskill._
+
+## Description
 
 The calculator supports operations such as 
 - addition, 
@@ -17,6 +19,12 @@ When working with variables you have to keep in mind that:
 - The value can be an __integer__, __float__ or a value of another __variable__.
 - Assigning a new value to an existing variable will rewrite the previous value.
 - Type the name of a variable to print its value.
+
+## Postfix notation
+
+The algebraic calculations are performed using _postfix notation_ and stack.
+
+## Examples
 
 Examples of work:
 ```commandline
